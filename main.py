@@ -10,7 +10,11 @@ TOKEN = os.environ["BOT_TOKEN"]
 
 bot = telebot.TeleBot(TOKEN)
 
-# Petit serveur pour Render (gratuit)
+# Supprime un éventuel webhook
+bot.remove_webhook()
+time.sleep(2)
+
+# Petit serveur pour Render
 app = Flask(__name__)
 
 @app.route("/")
@@ -20,7 +24,7 @@ def home():
 def run_web():
     app.run(host="0.0.0.0", port=10000)
 
-threading.Thread(target=run_web).start()
+threading.Thread(target=run_web, daemon=True).start()
 
 
 @bot.message_handler(commands=['start'])
@@ -46,12 +50,15 @@ def start(message):
         reply_markup=markup
     )
 
-
 print("Bot online!")
 
 while True:
     try:
-        bot.infinity_polling(skip_pending=True, timeout=30, long_polling_timeout=30)
+        bot.infinity_polling(
+            skip_pending=True,
+            timeout=30,
+            long_polling_timeout=30
+        )
     except Exception as e:
         print(f"Erreur : {e}")
         time.sleep(5)
